@@ -1,0 +1,582 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="third.MainWindow"
+        Title="Практическое занятие №3 — Динамические структуры данных (Стек, Очередь, Списки, Деревья)"
+        Width="1320" Height="880"
+        MinWidth="1050" MinHeight="720"
+        WindowStartupLocation="CenterScreen"
+        Background="#F4F6F9">
+
+    <Window.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14"/>
+            <Setter Property="Margin" Value="6"/>
+            <Setter Property="BorderBrush" Value="#DCE2EC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="TextBlock.h1">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+        <Style Selector="TextBlock.h2">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="#E2E8F0"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+        <Style Selector="Button.accent">
+            <Setter Property="Background" Value="#059669"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Верхняя шапка -->
+        <Border Grid.Row="0" Background="#1E293B" Padding="18,12">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel>
+                    <TextBlock Text="Практическое занятие №3: Динамические структуры данных"
+                               FontSize="20" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Часть 1 (Стек и ОПЗ) • Часть 2 (Очередь: Своя vs Queue&lt;T&gt;) • Часть 3 (Применение структур) • Часть 4 (12 алгоритмов со связными списками + Бинарное дерево)"
+                               FontSize="12" Foreground="#94A3B8" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Основной TabControl по 4 частям -->
+        <TabControl Grid.Row="1" Margin="8" Padding="4">
+
+            <!-- ========================================================================= -->
+            <!-- ВКЛАДКА 1: ЧАСТЬ 1 — СТЕК И ПОСТФИКСНАЯ ЗАПИСЬ (ОПЗ)                      -->
+            <!-- ========================================================================= -->
+            <TabItem Header="1 часть: Стек и ОПЗ (RPN)">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+
+                        <!-- Блок 1.1: Свой Стек на связном списке и input.txt -->
+                        <Border Grid.Row="0" Grid.Column="0" Classes="card">
+                            <StackPanel Spacing="8">
+                                <TextBlock Classes="h1" Text="1.1. Стек на СВОЕМ связном списке (input.txt)"/>
+                                <TextBlock Text="Операции: 1,elem — Push(elem), 2 — Pop(), 3 — Top(), 4 — isEmpty(), 5 — Print()"
+                                           FontSize="12" Foreground="#64748B" TextWrapping="Wrap"/>
+
+                                <!-- Ручное управление стеком -->
+                                <Border Background="#F8FAFC" CornerRadius="6" Padding="10" BorderBrush="#E2E8F0" BorderThickness="1">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="h2" Text="Ручное выполнение операций со стеком:"/>
+                                        <WrapPanel Orientation="Horizontal">
+                                            <TextBox x:Name="StackPushInput" Width="130" Watermark="Элемент (56, cat)" Text="56" Margin="0,0,6,6"/>
+                                            <Button Content="1: Push(elem)" Classes="primary" Click="OnStackPushClick" Margin="0,0,6,6"/>
+                                            <Button Content="2: Pop()" Classes="secondary" Click="OnStackPopClick" Margin="0,0,6,6"/>
+                                            <Button Content="3: Top()" Classes="secondary" Click="OnStackTopClick" Margin="0,0,6,6"/>
+                                            <Button Content="4: isEmpty()" Classes="secondary" Click="OnStackIsEmptyClick" Margin="0,0,6,6"/>
+                                            <Button Content="5: Print()" Classes="secondary" Click="OnStackPrintClick" Margin="0,0,6,6"/>
+                                            <Button Content="Очистить стек" Classes="secondary" Click="OnStackClearClick" Margin="0,0,0,6"/>
+                                        </WrapPanel>
+                                        <TextBlock x:Name="StackVisualStatus"
+                                                   Text="Текущий стек (от вершины): [Стек пуст]"
+                                                   FontWeight="SemiBold" Foreground="#0F172A" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Работа с файлом input.txt -->
+                                <TextBlock Classes="h2" Text="Содержимое файла input.txt:"/>
+                                <TextBox x:Name="StackFileInputBox"
+                                         Text="3 4 1,56 1,7 1,cat 2 5 4"
+                                         AcceptsReturn="True" Height="56" TextWrapping="Wrap"/>
+                                <WrapPanel Orientation="Horizontal">
+                                    <Button Content="Считать и выполнить из input.txt" Classes="primary" Click="OnStackRunFileClick" Margin="0,0,8,6"/>
+                                    <Button Content="Запустить замеры времени (Отчет)" Classes="accent" Click="OnStackBenchmarkClick" Margin="0,0,8,6"/>
+                                </WrapPanel>
+
+                                <TextBlock Classes="h2" Text="Результат выполнения операций и замеры времени:"/>
+                                <TextBox x:Name="StackOutputLog" IsReadOnly="True" AcceptsReturn="True"
+                                         Height="240" FontFamily="Consolas, Monospace" FontSize="12"
+                                         Background="#0F172A" Foreground="#E2E8F0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Блок 1.2: Перевод Инфикс -> Постфикс и Вычисление ОПЗ -->
+                        <Border Grid.Row="0" Grid.Column="1" Classes="card">
+                            <StackPanel Spacing="8">
+                                <TextBlock Classes="h1" Text="1.2. Постфиксная запись (ОПЗ / RPN) и Сложность"/>
+                                <TextBlock Text="Поддерживаются операции: +, -, *, :, /, ^, ln, cos, sin, sqrt, скобки ( )"
+                                           FontSize="12" Foreground="#64748B" TextWrapping="Wrap"/>
+
+                                <!-- Перевод из инфиксной в постфиксную -->
+                                <Border Background="#F8FAFC" CornerRadius="6" Padding="10" BorderBrush="#E2E8F0" BorderThickness="1">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="h2" Text="А) Перевод из инфиксной записи (понятной человеку) в постфиксную:"/>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <TextBox x:Name="InfixInputBox" Text="(7 + 8) / (3 + 2)" Watermark="Например: 2 + 2 * 3 или (7+8)/(3+2)"/>
+                                            <Button Grid.Column="1" Content="Перевести в ОПЗ ↓" Classes="primary" Click="OnConvertInfixClick" Margin="8,0,0,0"/>
+                                        </Grid>
+                                        <WrapPanel Orientation="Horizontal">
+                                            <Button Content="Пример 1: (7+8)/(3+2)" Classes="secondary" Click="OnPresetInfix1Click" Margin="0,4,6,0" FontSize="11"/>
+                                            <Button Content="Пример 2: 2+2" Classes="secondary" Click="OnPresetInfix2Click" Margin="0,4,6,0" FontSize="11"/>
+                                            <Button Content="Пример 3: sqrt(16) + 2 ^ 3 - ln(1) + cos(0)" Classes="secondary" Click="OnPresetInfix3Click" Margin="0,4,6,0" FontSize="11"/>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Вычисление постфиксной записи (из файла rpn_input.txt) -->
+                                <Border Background="#F8FAFC" CornerRadius="6" Padding="10" BorderBrush="#E2E8F0" BorderThickness="1">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="h2" Text="Б) Вычисление постфиксной записи (файл rpn_input.txt):"/>
+                                        <Grid ColumnDefinitions="*,Auto,Auto">
+                                            <TextBox x:Name="PostfixInputBox" Text="7 8 + 3 2 + /" Watermark="Постфиксная запись через пробел"/>
+                                            <Button Grid.Column="1" Content="Вычислить ОПЗ" Classes="accent" Click="OnEvaluatePostfixClick" Margin="8,0,0,0"/>
+                                            <Button Grid.Column="2" Content="Из файла rpn_input.txt" Classes="secondary" Click="OnEvaluatePostfixFileClick" Margin="6,0,0,0"/>
+                                        </Grid>
+                                        <TextBlock x:Name="RpnResultBanner"
+                                                   Text="Итоговый результат: 3"
+                                                   FontSize="16" FontWeight="Bold" Foreground="#059669"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Визуализация стаканов стека по шагам (как на рисунке в методичке) -->
+                                <TextBlock Classes="h2" Text="Пошаговая визуализация состояния стека (снизу вверх, как на схеме в задании):"/>
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Height="135">
+                                    <ItemsControl x:Name="RpnStepsVisualList">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="10"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </ScrollViewer>
+
+                                <!-- Оценка сложности и пошаговый протокол -->
+                                <TextBlock Classes="h2" Text="Расчет оценки сложности алгоритма и пошаговый протокол:"/>
+                                <TextBox x:Name="RpnComplexityAndLogBox" IsReadOnly="True" AcceptsReturn="True"
+                                         Height="165" FontFamily="Consolas, Monospace" FontSize="12"
+                                         Background="#0F172A" Foreground="#E2E8F0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ========================================================================= -->
+            <!-- ВКЛАДКА 2: ЧАСТЬ 2 — ОЧЕРЕДЬ (СВОЯ НА СПИСКЕ VS СТАНДАРТНАЯ QUEUE<T>)      -->
+            <!-- ========================================================================= -->
+            <TabItem Header="2 часть: Очередь (Своя vs Queue&lt;T&gt;)">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid ColumnDefinitions="5*,7*">
+
+                        <!-- Левая колонка: управление очередью и input.txt -->
+                        <Border Grid.Column="0" Classes="card">
+                            <StackPanel Spacing="8">
+                                <TextBlock Classes="h1" Text="2.1. Работа с Очередью (FIFO)"/>
+                                <TextBlock Text="Команды: 1,elem — вставка, 2 — удаление, 3 — просмотр начала, 4 — проверка на пустоту, 5 — печать"
+                                           FontSize="12" Foreground="#64748B" TextWrapping="Wrap"/>
+
+                                <Border Background="#F8FAFC" CornerRadius="6" Padding="10" BorderBrush="#E2E8F0" BorderThickness="1">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="h2" Text="Интерактивные операции (CustomQueue + Queue&lt;T&gt;):"/>
+                                        <WrapPanel Orientation="Horizontal">
+                                            <TextBox x:Name="QueueEnqueueInput" Width="120" Text="56" Watermark="Значение" Margin="0,0,6,6"/>
+                                            <Button Content="1: Вставка" Classes="primary" Click="OnQueueEnqueueClick" Margin="0,0,6,6"/>
+                                            <Button Content="2: Удаление" Classes="secondary" Click="OnQueueDequeueClick" Margin="0,0,6,6"/>
+                                            <Button Content="3: Начало" Classes="secondary" Click="OnQueuePeekClick" Margin="0,0,6,6"/>
+                                            <Button Content="4: Пустота?" Classes="secondary" Click="OnQueueIsEmptyClick" Margin="0,0,6,6"/>
+                                            <Button Content="5: Печать" Classes="secondary" Click="OnQueuePrintClick" Margin="0,0,6,6"/>
+                                            <Button Content="Очистить" Classes="secondary" Click="OnQueueClearClick" Margin="0,0,0,6"/>
+                                        </WrapPanel>
+                                        <TextBlock x:Name="QueueVisualStatus"
+                                                   Text="Своя очередь (CustomQueue): [Очередь пуста]"
+                                                   FontWeight="SemiBold" Foreground="#0F172A" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <TextBlock Classes="h2" Text="Набор команд в файле input.txt:"/>
+                                <TextBox x:Name="QueueFileInputBox"
+                                         Text="3 4 1,56 1,7 1,cat 2 5 4"
+                                         AcceptsReturn="True" Height="64" TextWrapping="Wrap"/>
+                                <Button Content="Считать input.txt и выполнить на обеих очередях"
+                                        Classes="primary" Click="OnQueueRunFileClick"/>
+
+                                <TextBlock Classes="h2" Text="Лог выполнения операций:"/>
+                                <TextBox x:Name="QueueOutputLog" IsReadOnly="True" AcceptsReturn="True"
+                                         Height="310" FontFamily="Consolas, Monospace" FontSize="12"
+                                         Background="#0F172A" Foreground="#E2E8F0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Правая колонка: Сравнение времени и максимальное расхождение -->
+                        <Border Grid.Column="1" Classes="card">
+                            <StackPanel Spacing="8">
+                                <TextBlock Classes="h1" Text="2.2. Сравнение времени: Своя Очередь (Список) vs Стандартная Queue&lt;T&gt;"/>
+                                <TextBlock Text="Исследование наборов: 1) различных по длине, 2) одинаковых по длине (20 000 оп.), но различных по составу (с достижением максимального расхождения по времени)."
+                                           FontSize="12" Foreground="#64748B" TextWrapping="Wrap"/>
+
+                                <Button Content="🚀 Запустить полное сравнение и замеры для отчета"
+                                        Classes="accent" Click="OnQueueBenchmarkClick" HorizontalAlignment="Left"/>
+
+                                <TextBox x:Name="QueueBenchmarkReportBox" IsReadOnly="True" AcceptsReturn="True"
+                                         Height="530" FontFamily="Consolas, Monospace" FontSize="12"
+                                         Background="#0F172A" Foreground="#E2E8F0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ========================================================================= -->
+            <!-- ВКЛАДКА 3: ЧАСТЬ 3 — ПРАКТИЧЕСКОЕ ПРИМЕНЕНИЕ ДИНАМИЧЕСКИХ СТРУКТУР         -->
+            <!-- ========================================================================= -->
+            <TabItem Header="3 часть: Применение структур (2 основных + все категории)">
+                <Grid RowDefinitions="Auto,*">
+                    <Border Grid.Row="0" Classes="card" Background="#EFF6FF" BorderBrush="#BFDBFE">
+                        <StackPanel Spacing="4">
+                            <TextBlock FontWeight="Bold" FontSize="15" Foreground="#1E3A8A"
+                                       Text="Часть 3: Практическое применение динамических структур данных"/>
+                            <TextBlock FontSize="13" Foreground="#1E40AF" TextWrapping="Wrap"
+                                       Text="★ Выбраны и реализованы 2 главных наглядных проекта: 1) Плейлист с навигацией (Двусвязный список) и 2) История браузера (Два стека LIFO), а также дополнительно реализованы 3) Спулер печати с приоритетами (Очередь) и 4) Префиксное дерево Trie (Автодополнение), чтобы закрыть все 4 категории!"/>
+                        </StackPanel>
+                    </Border>
+
+                    <TabControl Grid.Row="1" Margin="4">
+                        <!-- Пример 1 (ОСНОВНОЙ ВЫБРАННЫЙ №1): Плейлист с навигацией -->
+                        <TabItem Header="★ 1. Список: Плейлист с навигацией">
+                            <Border Classes="card">
+                                <Grid ColumnDefinitions="5*,6*" RowDefinitions="Auto,*">
+                                    <StackPanel Grid.Column="0" Spacing="10" Margin="0,0,12,0">
+                                        <TextBlock Classes="h1" Text="Плейлист с навигацией (Двусвязный список)"/>
+                                        <TextBlock Text="Каждый трек — узел двусвязного списка (PlaylistNode) со ссылками Prev и Next. Поддерживаются переходы «Назад» O(1), «Далее» O(1), удаление текущего трека O(1) и перемешивание (Shuffle)."
+                                                   TextWrapping="Wrap" Foreground="#475569" FontSize="13"/>
+
+                                        <!-- Панель текущего трека -->
+                                        <Border Background="#1E293B" CornerRadius="8" Padding="14">
+                                            <StackPanel Spacing="6">
+                                                <TextBlock Text="СЕЙЧАС ИГРАЕТ:" FontSize="11" Foreground="#38BDF8" FontWeight="Bold"/>
+                                                <TextBlock x:Name="PlaylistNowPlayingText" Text="Queen — Bohemian Rhapsody (5:55)"
+                                                           FontSize="17" FontWeight="Bold" Foreground="White" TextWrapping="Wrap"/>
+                                                <TextBlock x:Name="PlaylistLinksInfoText" Text="Prev: NULL | Next: Nirvana — Smells Like Teen Spirit"
+                                                           FontSize="12" Foreground="#94A3B8" TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Кнопки управления плеером -->
+                                        <WrapPanel Orientation="Horizontal">
+                                            <Button Content="⏮ Назад (Prev)" Classes="primary" Click="OnPlaylistPrevClick" Margin="0,0,8,8"/>
+                                            <Button Content="⏭ Далее (Next)" Classes="primary" Click="OnPlaylistNextClick" Margin="0,0,8,8"/>
+                                            <Button Content="🔀 Перемешать (Shuffle)" Classes="accent" Click="OnPlaylistShuffleClick" Margin="0,0,8,8"/>
+                                            <Button Content="🗑 Удалить текущий трек" Classes="secondary" Click="OnPlaylistRemoveClick" Margin="0,0,8,8"/>
+                                        </WrapPanel>
+
+                                        <!-- Добавление нового трека -->
+                                        <Border Background="#F8FAFC" CornerRadius="6" Padding="10" BorderBrush="#E2E8F0" BorderThickness="1">
+                                            <StackPanel Spacing="6">
+                                                <TextBlock Classes="h2" Text="Добавить новый трек в конец двусвязного списка:"/>
+                                                <Grid ColumnDefinitions="*,*,80,Auto">
+                                                    <TextBox x:Name="NewTrackArtistBox" Watermark="Исполнитель" Text="Linkin Park" Margin="0,0,6,0"/>
+                                                    <TextBox Grid.Column="1" x:Name="NewTrackTitleBox" Watermark="Название трека" Text="Numb" Margin="0,0,6,0"/>
+                                                    <TextBox Grid.Column="2" x:Name="NewTrackDurationBox" Watermark="Время" Text="3:07" Margin="0,0,6,0"/>
+                                                    <Button Grid.Column="3" Content="＋ Добавить" Classes="primary" Click="OnPlaylistAddClick"/>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="1" Spacing="8">
+                                        <TextBlock Classes="h2" Text="Структура двусвязного списка треков (Head ⇄ ... ⇄ Tail):"/>
+                                        <TextBox x:Name="PlaylistVisualBox" IsReadOnly="True" AcceptsReturn="True"
+                                                 Height="420" FontFamily="Consolas, Monospace" FontSize="13"
+                                                 Background="#0F172A" Foreground="#E2E8F0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </TabItem>
+
+                        <!-- Пример 2 (ОСНОВНОЙ ВЫБРАННЫЙ №2): История браузера (Два стека) -->
+                        <TabItem Header="★ 2. Стек (LIFO): История браузера">
+                            <Border Classes="card">
+                                <Grid ColumnDefinitions="5*,6*">
+                                    <StackPanel Grid.Column="0" Spacing="10" Margin="0,0,12,0">
+                                        <TextBlock Classes="h1" Text="История браузера (Два стека: «Назад» и «Вперёд»)"/>
+                                        <TextBlock Text="Реализовано на базе двух экземпляров нашего класса CustomStack&lt;string&gt;. При переходе на новую страницу текущий адрес помещается в стек Back, а стек Forward очищается."
+                                                   TextWrapping="Wrap" Foreground="#475569" FontSize="13"/>
+
+                                        <!-- Панель навигации браузера -->
+                                        <Border Background="#1E293B" CornerRadius="8" Padding="14">
+                                            <StackPanel Spacing="8">
+                                                <TextBlock Text="АДРЕСНАЯ СТРОКА БРАУЗЕРА:" FontSize="11" Foreground="#38BDF8" FontWeight="Bold"/>
+                                                <TextBlock x:Name="BrowserCurrentUrlText" Text="https://habr.com/ru/articles/"
+                                                           FontSize="16" FontWeight="Bold" Foreground="White" TextWrapping="Wrap"/>
+                                                <WrapPanel Orientation="Horizontal">
+                                                    <Button x:Name="BrowserBackBtn" Content="⬅ Назад (BackStack.Pop)" Classes="primary" Click="OnBrowserBackClick" Margin="0,4,8,0"/>
+                                                    <Button x:Name="BrowserForwardBtn" Content="➡ Вперёд (ForwardStack.Pop)" Classes="primary" Click="OnBrowserForwardClick" Margin="0,4,0,0"/>
+                                                </WrapPanel>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Переход на новый URL -->
+                                        <Border Background="#F8FAFC" CornerRadius="6" Padding="10" BorderBrush="#E2E8F0" BorderThickness="1">
+                                            <StackPanel Spacing="6">
+                                                <TextBlock Classes="h2" Text="Перейти на новую страницу:"/>
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <TextBox x:Name="BrowserNewUrlBox" Text="https://ru.wikipedia.org/wiki/Стек" Watermark="Введите URL..."/>
+                                                    <Button Grid.Column="1" Content="Перейти ↵" Classes="accent" Click="OnBrowserVisitClick" Margin="8,0,0,0"/>
+                                                </Grid>
+                                                <WrapPanel Orientation="Horizontal">
+                                                    <Button Content="wikipedia.org" Classes="secondary" Click="OnBrowserQuickUrl1" Margin="0,4,6,0" FontSize="11"/>
+                                                    <Button Content="stackoverflow.com" Classes="secondary" Click="OnBrowserQuickUrl2" Margin="0,4,6,0" FontSize="11"/>
+                                                    <Button Content="dotnet.microsoft.com" Classes="secondary" Click="OnBrowserQuickUrl3" Margin="0,4,6,0" FontSize="11"/>
+                                                </WrapPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Spacing="8">
+                                        <TextBlock Classes="h2" Text="Состояние двух стеков (BackStack и ForwardStack):"/>
+                                        <TextBox x:Name="BrowserStacksVisualBox" IsReadOnly="True" AcceptsReturn="True"
+                                                 Height="420" FontFamily="Consolas, Monospace" FontSize="13"
+                                                 Background="#0F172A" Foreground="#E2E8F0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </TabItem>
+
+                        <!-- Пример 3: Очередь — Спулер печати с приоритетами -->
+                        <TabItem Header="3. Очередь (FIFO): Спулер печати">
+                            <Border Classes="card">
+                                <Grid ColumnDefinitions="5*,6*">
+                                    <StackPanel Grid.Column="0" Spacing="10" Margin="0,0,12,0">
+                                        <TextBlock Classes="h1" Text="Спулер печати с приоритетами и отменой заданий"/>
+                                        <TextBlock Text="Очередь заданий на принтер на базе связного списка PrintJobNode. Задания вставляются с учетом приоритета (1 — Высокий, 2 — Обычный, 3 — Низкий), внутри одного приоритета действует порядок FIFO."
+                                                   TextWrapping="Wrap" Foreground="#475569" FontSize="13"/>
+
+                                        <Border Background="#F8FAFC" CornerRadius="6" Padding="10" BorderBrush="#E2E8F0" BorderThickness="1">
+                                            <StackPanel Spacing="6">
+                                                <TextBlock Classes="h2" Text="Добавить документ в очередь печати:"/>
+                                                <TextBox x:Name="SpoolerDocNameBox" Text="Курсовая_работа.pdf" Watermark="Имя файла"/>
+                                                <Grid ColumnDefinitions="*,*">
+                                                    <TextBox x:Name="SpoolerPagesBox" Text="25" Watermark="Страниц" Margin="0,0,6,0"/>
+                                                    <ComboBox Grid.Column="1" x:Name="SpoolerPriorityCombo" SelectedIndex="0" HorizontalAlignment="Stretch">
+                                                        <ComboBoxItem Content="1 — Высокий приоритет"/>
+                                                        <ComboBoxItem Content="2 — Обычный приоритет"/>
+                                                        <ComboBoxItem Content="3 — Низкий приоритет"/>
+                                                    </ComboBox>
+                                                </Grid>
+                                                <Button Content="＋ Отправить в очередь печати" Classes="primary" Click="OnSpoolerAddClick"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <WrapPanel Orientation="Horizontal">
+                                            <Button Content="🖨 Напечатать следующее задание (Dequeue)" Classes="accent" Click="OnSpoolerPrintNextClick" Margin="0,0,8,8"/>
+                                        </WrapPanel>
+
+                                        <Border Background="#F8FAFC" CornerRadius="6" Padding="10" BorderBrush="#E2E8F0" BorderThickness="1">
+                                            <StackPanel Spacing="6">
+                                                <TextBlock Classes="h2" Text="Отменить задание по его ID:"/>
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <TextBox x:Name="SpoolerCancelIdBox" Text="2" Watermark="ID задания"/>
+                                                    <Button Grid.Column="1" Content="❌ Отменить задание" Classes="secondary" Click="OnSpoolerCancelClick" Margin="8,0,0,0"/>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Spacing="8">
+                                        <TextBlock Classes="h2" Text="Текущая очередь заданий принтера и журнал печати:"/>
+                                        <TextBox x:Name="SpoolerVisualBox" IsReadOnly="True" AcceptsReturn="True"
+                                                 Height="420" FontFamily="Consolas, Monospace" FontSize="13"
+                                                 Background="#0F172A" Foreground="#E2E8F0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </TabItem>
+
+                        <!-- Пример 4: Деревья — Префиксное дерево (Trie) автодополнения -->
+                        <TabItem Header="4. Деревья: Префиксное дерево (Trie)">
+                            <Border Classes="card">
+                                <Grid ColumnDefinitions="5*,6*">
+                                    <StackPanel Grid.Column="0" Spacing="10" Margin="0,0,12,0">
+                                        <TextBlock Classes="h1" Text="Префиксное дерево (Trie): Автодополнение поиска"/>
+                                        <TextBlock Text="Каждый узел TrieNode хранит переходы по символам и флаг конца слова. Поиск всех слов с заданным префиксом выполняется за O(L + K), где L — длина префикса."
+                                                   TextWrapping="Wrap" Foreground="#475569" FontSize="13"/>
+
+                                        <Border Background="#F8FAFC" CornerRadius="6" Padding="10" BorderBrush="#E2E8F0" BorderThickness="1">
+                                            <StackPanel Spacing="6">
+                                                <TextBlock Classes="h2" Text="Поиск слов по префиксу (живое автодополнение):"/>
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <TextBox x:Name="TriePrefixInputBox" Text="ст" Watermark="Введите префикс (например: а, ст, де, п)..." TextChanged="OnTriePrefixTextChanged"/>
+                                                    <Button Grid.Column="1" Content="🔍 Найти" Classes="primary" Click="OnTrieSearchClick" Margin="8,0,0,0"/>
+                                                </Grid>
+                                                <WrapPanel Orientation="Horizontal">
+                                                    <Button Content="Префикс «а»" Classes="secondary" Click="OnTriePresetA" Margin="0,4,6,0" FontSize="11"/>
+                                                    <Button Content="Префикс «ст»" Classes="secondary" Click="OnTriePresetSt" Margin="0,4,6,0" FontSize="11"/>
+                                                    <Button Content="Префикс «де»" Classes="secondary" Click="OnTriePresetDe" Margin="0,4,6,0" FontSize="11"/>
+                                                    <Button Content="Префикс «по»" Classes="secondary" Click="OnTriePresetPo" Margin="0,4,6,0" FontSize="11"/>
+                                                    <Button Content="Все слова («»)" Classes="secondary" Click="OnTriePresetAll" Margin="0,4,6,0" FontSize="11"/>
+                                                </WrapPanel>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <Border Background="#F8FAFC" CornerRadius="6" Padding="10" BorderBrush="#E2E8F0" BorderThickness="1">
+                                            <StackPanel Spacing="6">
+                                                <TextBlock Classes="h2" Text="Добавить новое слово в префиксное дерево:"/>
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <TextBox x:Name="TrieNewWordBox" Text="стековый" Watermark="Новое слово..."/>
+                                                    <Button Grid.Column="1" Content="＋ Вставить в Trie" Classes="accent" Click="OnTrieInsertClick" Margin="8,0,0,0"/>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Spacing="8">
+                                        <TextBlock Classes="h2" Text="Результаты автодополнения из префиксного дерева (Trie):"/>
+                                        <TextBox x:Name="TrieOutputBox" IsReadOnly="True" AcceptsReturn="True"
+                                                 Height="420" FontFamily="Consolas, Monospace" FontSize="13"
+                                                 Background="#0F172A" Foreground="#E2E8F0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </TabItem>
+
+            <!-- ========================================================================= -->
+            <!-- ВКЛАДКА 4: ЧАСТЬ 4 — 12 АЛГОРИТМОВ СО СВОИМ СПИСКОМ + БИНАРНОЕ ДЕРЕВО      -->
+            <!-- ========================================================================= -->
+            <TabItem Header="4 часть: 12 функций связного списка + Дерево (2024)">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid ColumnDefinitions="6*,6*">
+
+                        <!-- Левая колонка: Текущий список L, параметры и все 12 функций -->
+                        <Border Grid.Column="0" Classes="card">
+                            <StackPanel Spacing="8">
+                                <TextBlock Classes="h1" Text="4.1. Алгоритмы работы со СВОИМ связным списком L"/>
+
+                                <!-- Инициализация списка L -->
+                                <Border Background="#EFF6FF" CornerRadius="6" Padding="10" BorderBrush="#BFDBFE" BorderThickness="1">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="h2" Text="Текущий односвязный список L (целые числа):"/>
+                                        <TextBlock x:Name="LinkedListCurrentText"
+                                                   Text="[10] -> [20] -> [30] -> [20] -> [40] -> [50] -> NULL"
+                                                   FontFamily="Consolas, Monospace" FontSize="14" FontWeight="Bold"
+                                                   Foreground="#1E3A8A" TextWrapping="Wrap"/>
+                                        <Grid ColumnDefinitions="*,Auto,Auto">
+                                            <TextBox x:Name="LinkedListInitBox" Text="10 20 30 20 40 50" Watermark="Числа через пробел"/>
+                                            <Button Grid.Column="1" Content="Задать список L" Classes="primary" Click="OnListSetClick" Margin="6,0,0,0"/>
+                                            <Button Grid.Column="2" Content="Упорядоченный" Classes="secondary" Click="OnListSetSortedClick" Margin="6,0,0,0"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Параметры X, E, F для функций -->
+                                <Border Background="#F8FAFC" CornerRadius="6" Padding="10" BorderBrush="#E2E8F0" BorderThickness="1">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="h2" Text="Параметры для алгоритмов (числа X, E, F и файл lists_input.txt):"/>
+                                        <Grid ColumnDefinitions="*,*,*">
+                                            <StackPanel Margin="0,0,6,0">
+                                                <TextBlock Text="Число X (или 1-й эл. обмена):" FontSize="11"/>
+                                                <TextBox x:Name="ListParamXBox" Text="20"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Margin="3,0,3,0">
+                                                <TextBlock Text="Число E (или 2-й эл. обмена):" FontSize="11"/>
+                                                <TextBox x:Name="ListParamEBox" Text="30"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" Margin="6,0,0,0">
+                                                <TextBlock Text="Новый элемент F:" FontSize="11"/>
+                                                <TextBox x:Name="ListParamFBox" Text="99"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Кнопки всех 12 алгоритмов по порядку из задания -->
+                                <TextBlock Classes="h2" Text="Выберите алгоритм для выполнения над списком L:"/>
+                                <StackPanel Spacing="5">
+                                    <Button HorizontalAlignment="Stretch" Classes="secondary" Click="OnListAlg1Reverse"
+                                            Content="1. Перевернуть список L (изменить ссылки в обратном порядке)"/>
+                                    <Grid ColumnDefinitions="*,*">
+                                        <Button Grid.Column="0" HorizontalAlignment="Stretch" Classes="secondary" Click="OnListAlg2LastToFirst" Margin="0,0,3,0"
+                                                Content="2а. Последний элемент -> в начало"/>
+                                        <Button Grid.Column="1" HorizontalAlignment="Stretch" Classes="secondary" Click="OnListAlg2FirstToLast" Margin="3,0,0,0"
+                                                Content="2б. Первый элемент -> в конец"/>
+                                    </Grid>
+                                    <Button HorizontalAlignment="Stretch" Classes="secondary" Click="OnListAlg3CountDistinct"
+                                            Content="3. Определить количество различных элементов списка L"/>
+                                    <Grid ColumnDefinitions="*,*">
+                                        <Button Grid.Column="0" HorizontalAlignment="Stretch" Classes="secondary" Click="OnListAlg4RemoveDupsKeepOne" Margin="0,0,3,0"
+                                                Content="4а. Удалить дубликаты (оставить по 1)"/>
+                                        <Button Grid.Column="1" HorizontalAlignment="Stretch" Classes="secondary" Click="OnListAlg4RemoveAllNonUnique" Margin="3,0,0,0"
+                                                Content="4б. Удалить все неуникальные полностью"/>
+                                    </Grid>
+                                    <Button HorizontalAlignment="Stretch" Classes="secondary" Click="OnListAlg5InsertSelfAfterX"
+                                            Content="5. Вставить список сам в себя вслед за первым вхождением числа X"/>
+                                    <Button HorizontalAlignment="Stretch" Classes="secondary" Click="OnListAlg6InsertOrdered"
+                                            Content="6. Вставить в упорядоченный по неубыванию список L элемент E"/>
+                                    <Button HorizontalAlignment="Stretch" Classes="secondary" Click="OnListAlg7RemoveAllE"
+                                            Content="7. Удалить из списка L все элементы E, если таковые имеются"/>
+                                    <Button HorizontalAlignment="Stretch" Classes="secondary" Click="OnListAlg8InsertFBeforeE"
+                                            Content="8. Вставить в список L новый элемент F перед первым вхождением E"/>
+                                    <Button HorizontalAlignment="Stretch" Classes="secondary" Click="OnListAlg9AppendFromFile"
+                                            Content="9. Дописать к списку L список E (считать оба списка из файла lists_input.txt)"/>
+                                    <Button HorizontalAlignment="Stretch" Classes="secondary" Click="OnListAlg10SplitByX"
+                                            Content="10. Разбить список на два по первому вхождению числа X"/>
+                                    <Button HorizontalAlignment="Stretch" Classes="secondary" Click="OnListAlg11DuplicateSelf"
+                                            Content="11. Удвоить список L (приписать в конец списка самого себя)"/>
+                                    <Button HorizontalAlignment="Stretch" Classes="secondary" Click="OnListAlg12SwapElements"
+                                            Content="12. Поменять местами два элемента списка (X и E), заданные пользователем"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Правая колонка: Журнал работы со списком + Бинарное дерево со скриншота 2024 -->
+                        <StackPanel Grid.Column="1">
+                            <Border Classes="card">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Classes="h1" Text="4.2. Протокол выполнения операций со списком L"/>
+                                    <TextBox x:Name="LinkedListLogBox" IsReadOnly="True" AcceptsReturn="True"
+                                             Height="280" FontFamily="Consolas, Monospace" FontSize="12"
+                                             Background="#0F172A" Foreground="#E2E8F0" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Classes="card">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Classes="h1" Text="4.3. Дерево ABD*G***CE**FH**J**"/>
+                                    <TextBlock Text="Построение бинарного дерева из префиксной строки, где '*' означает NULL-указатель, с выводом связей узлов и обходов дерева."
+                                               FontSize="12" Foreground="#64748B" TextWrapping="Wrap"/>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBox x:Name="BinaryTreeStringBox" Text="ABD*G***CE**FH**J**"/>
+                                        <Button Grid.Column="1" Content="Построить дерево" Classes="accent" Click="OnBuildBinaryTreeClick" Margin="8,0,0,0"/>
+                                    </Grid>
+                                    <TextBox x:Name="BinaryTreeOutputBox" IsReadOnly="True" AcceptsReturn="True"
+                                             Height="240" FontFamily="Consolas, Monospace" FontSize="12"
+                                             Background="#0F172A" Foreground="#E2E8F0" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</Window>
